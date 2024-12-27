@@ -33,21 +33,6 @@
 			);
 			target = B94EEB412D1DF63D001F53FD /* OpenAISwift */;
 		};
-		B94EEC122D1E5321001F53FD /* Exceptions for "OpenAISwiftTests" folder in "OpenAISwiftTests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Config/EnvironmentLoader.swift,
-				Core/OpenAIClientTests.swift,
-				Core/TestError.swift,
-				Features/ChatAPITests.swift,
-				Features/EmbeddingsAPITests.swift,
-				LiveTests/ChatAPILiveTests.swift,
-				LiveTests/EmbeddingsAPILiveTests.swift,
-				Mocks/MockResponses.swift,
-				Mocks/MockURLProtocol.swift,
-			);
-			target = B94EEC072D1E5311001F53FD /* OpenAISwiftTests */;
-		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -61,9 +46,6 @@
 		};
 		B94EEC092D1E5311001F53FD /* OpenAISwiftTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				B94EEC122D1E5321001F53FD /* Exceptions for "OpenAISwiftTests" folder in "OpenAISwiftTests" target */,
-			);
 			path = OpenAISwiftTests;
 			sourceTree = "<group>";
 		};
@@ -181,6 +163,7 @@
 					};
 					B94EEC072D1E5311001F53FD = {
 						CreatedOnToolsVersion = 16.2;
+						LastSwiftMigration = 1620;
 					};
 				};
 			};
@@ -459,6 +442,7 @@
 		B94EEC102D1E5311001F53FD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6897VAM74N;
@@ -471,6 +455,9 @@
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
 				XROS_DEPLOYMENT_TARGET = 2.2;
@@ -480,6 +467,7 @@
 		B94EEC112D1E5311001F53FD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6897VAM74N;
@@ -492,6 +480,8 @@
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
 				XROS_DEPLOYMENT_TARGET = 2.2;
