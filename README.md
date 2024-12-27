@@ -96,7 +96,7 @@ swift test --filter "EmbeddingsAPITests"
 
 Live tests make actual API calls to test the integration:
 
-1. Configure your API key in `OpenAISwiftTests/TestConfig.swift`:
+1. Configure your API key in `OpenAISwiftTests/Config/TestConfig.swift`:
 ```swift
 enum TestConfig {
     static let apiKey = "your-api-key-here"
@@ -119,18 +119,21 @@ swift test --filter "EmbeddingsAPILiveTests"
 
 ```
 OpenAISwiftTests/
-├── Core/                 # Core component tests
+├── Config/             # Test configuration
+│   └── TestConfig.swift
+│
+├── Core/              # Core component tests
 │   └── OpenAIClientTests.swift
 │
-├── Features/            # Feature-specific tests
+├── Features/         # Feature-specific tests
 │   ├── ChatAPITests.swift
 │   └── EmbeddingsAPITests.swift
 │
-├── LiveTests/          # Real API integration tests
+├── LiveTests/       # Real API integration tests
 │   ├── ChatAPILiveTests.swift
 │   └── EmbeddingsAPILiveTests.swift
 │
-└── Mocks/             # Test utilities
+└── Mocks/          # Test utilities
     ├── MockURLProtocol.swift
     └── MockResponses.swift
 ```

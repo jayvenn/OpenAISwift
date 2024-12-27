@@ -8,4 +8,4 @@ DerivedData/
 .netrc
 
 # Ignore test config with API key
-OpenAISwiftTests/TestConfig.swift
+OpenAISwiftTests/Config/TestConfig.swift
