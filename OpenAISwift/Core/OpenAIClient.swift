@@ -8,6 +8,14 @@ public final class OpenAIClient {
     /// URLSession for making network requests
     private let session: URLSession
     
+    // MARK: - Features
+    
+    /// Chat completion API
+    public lazy var chat: ChatAPI = ChatEndpoint(client: self)
+    
+    /// Embeddings API
+    public lazy var embeddings: EmbeddingsAPI = EmbeddingsEndpoint(client: self)
+    
     /// Creates a new OpenAI client
     /// - Parameter configuration: The configuration for the client
     /// - Parameter session: Optional custom URLSession (useful for testing)
