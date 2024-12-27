@@ -97,7 +97,45 @@ OPENAI_BASE_URL=https://api.openai.com/v1
 OPENAI_TIMEOUT=30
 ```
 
-The environment variables will be automatically loaded when running tests. The `.env` file is git-ignored for security.
+3. Create `OpenAISwiftTests/Config/TestConfig.swift`:
+```swift
+import Foundation
+
+enum TestConfig {
+    private static let _: Void = {
+        EnvironmentLoader.load()
+    }()
+    
+    static var apiKey: String {
+        guard let key = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] else {
+            fatalError("⚠️ Please set OPENAI_API_KEY in .env file")
+        }
+        return key
+    }
+    
+    static var organization: String? {
+        ProcessInfo.processInfo.environment["OPENAI_ORGANIZATION"]
+    }
+    
+    static var baseURL: URL {
+        if let urlString = ProcessInfo.processInfo.environment["OPENAI_BASE_URL"],
+           let url = URL(string: urlString) {
+            return url
+        }
+        return URL(string: "https://api.openai.com/v1")!
+    }
+    
+    static var timeoutInterval: TimeInterval {
+        if let timeoutString = ProcessInfo.processInfo.environment["OPENAI_TIMEOUT"],
+           let timeout = TimeInterval(timeoutString) {
+            return timeout
+        }
+        return 30
+    }
+}
+```
+
+The environment variables will be automatically loaded when running tests. Both the `.env` file and `TestConfig.swift` are git-ignored for security.
 
 ### Unit Tests
 
@@ -127,7 +165,6 @@ swift test --filter "EmbeddingsAPILiveTests"
 ```
 OpenAISwiftTests/
 ├── Config/             # Test configuration
-│   ├── TestConfig.template.swift
 │   ├── TestConfig.swift (git-ignored)
 │   └── EnvironmentLoader.swift
 │
