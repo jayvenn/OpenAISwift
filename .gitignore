@@ -7,5 +7,6 @@ DerivedData/
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
 
-# Ignore test config with API key
+# Ignore test config and environment files
 OpenAISwiftTests/Config/TestConfig.swift
+.env

@@ -81,6 +81,24 @@ let response = try await client.embeddings.createEmbeddings(request)
 
 The library includes both unit tests and live API tests.
 
+### Setting Up API Keys for Testing
+
+1. Copy the environment template:
+```bash
+cp .env.example .env
+```
+
+2. Edit `.env` with your API keys:
+```bash
+# OpenAI API Configuration
+OPENAI_API_KEY=your-actual-api-key-here
+OPENAI_ORGANIZATION=optional-org-id
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_TIMEOUT=30
+```
+
+The environment variables will be automatically loaded when running tests. The `.env` file is git-ignored for security.
+
 ### Unit Tests
 
 Unit tests use mock responses and don't make actual API calls:
@@ -94,19 +112,8 @@ swift test --filter "EmbeddingsAPITests"
 
 ### Live API Tests
 
-Live tests make actual API calls to test the integration:
+Live tests make actual API calls using your API key from the `.env` file:
 
-1. Configure your API key in `OpenAISwiftTests/Config/TestConfig.swift`:
-```swift
-enum TestConfig {
-    static let apiKey = "your-api-key-here"
-    static let organization: String? = nil
-    static let baseURL = URL(string: "https://api.openai.com/v1")!
-    static let timeoutInterval: TimeInterval = 30
-}
-```
-
-2. Run the live tests:
 ```bash
 # Test Chat API
 swift test --filter "ChatAPILiveTests"
@@ -120,7 +127,9 @@ swift test --filter "EmbeddingsAPILiveTests"
 ```
 OpenAISwiftTests/
 ├── Config/             # Test configuration
-│   └── TestConfig.swift
+│   ├── TestConfig.template.swift
+│   ├── TestConfig.swift (git-ignored)
+│   └── EnvironmentLoader.swift
 │
 ├── Core/              # Core component tests
 │   └── OpenAIClientTests.swift
