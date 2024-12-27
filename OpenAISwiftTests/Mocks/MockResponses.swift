@@ -1,7 +1,4 @@
-import Foundation
-
-/// Mock API responses for testing
-enum MockResponses {
+struct MockResponses {
     static let chatCompletion = """
     {
         "id": "chatcmpl-123",
@@ -24,12 +21,12 @@ enum MockResponses {
     }
     """
     
-    static let embedding = """
+    static let embeddings = """
     {
         "object": "list",
         "data": [{
             "object": "embedding",
-            "embedding": [0.0023064255, -0.009327292, 0.015954123],
+            "embedding": [0.0023064255, -0.009327292, 0.015797347, -0.0077780345],
             "index": 0
         }],
         "model": "text-embedding-ada-002",
@@ -40,12 +37,25 @@ enum MockResponses {
     }
     """
     
-    static let error = """
+    static let embeddingsMultiple = """
     {
-        "error": {
-            "message": "Invalid API key",
-            "type": "invalid_request_error",
-            "code": "invalid_api_key"
+        "object": "list",
+        "data": [
+            {
+                "object": "embedding",
+                "embedding": [0.0023064255, -0.009327292, 0.015797347, -0.0077780345],
+                "index": 0
+            },
+            {
+                "object": "embedding",
+                "embedding": [0.0028064255, -0.008327292, 0.016797347, -0.0067780345],
+                "index": 1
+            }
+        ],
+        "model": "text-embedding-ada-002",
+        "usage": {
+            "prompt_tokens": 16,
+            "total_tokens": 16
         }
     }
     """

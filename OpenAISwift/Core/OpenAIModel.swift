@@ -7,15 +7,19 @@ public enum OpenAIModel: String, Codable, Sendable {
     case gpt4Turbo = "gpt-4-1106-preview"
     case gpt4Vision = "gpt-4-vision-preview"
     case gpt4_32k = "gpt-4-32k"
+    case gpt4_0314 = "gpt-4-0314"
+    case gpt4_32k_0314 = "gpt-4-32k-0314"
     
     // MARK: - GPT-3.5 Models
     case gpt3_5Turbo = "gpt-3.5-turbo"
     case gpt3_5Turbo_16k = "gpt-3.5-turbo-16k"
+    case gpt3_5Turbo_0301 = "gpt-3.5-turbo-0301"
     
     // MARK: - Embedding Models
-    case embeddings = "text-embedding-ada-002"
-    case embeddingsV3 = "text-embedding-3-small"
-    case embeddingsV3Large = "text-embedding-3-large"
+    case textEmbeddingAda002 = "text-embedding-ada-002"
+    case textSearchAda001 = "text-search-ada-001"
+    case textEmbeddingV3Small = "text-embedding-3-small"
+    case textEmbeddingV3Large = "text-embedding-3-large"
     
     // MARK: - Image Models
     case dalle2 = "dall-e-2"
@@ -44,11 +48,17 @@ public extension OpenAIModel {
             return 128000
         case .gpt4_32k:
             return 32768
+        case .gpt4_0314:
+            return 8192
+        case .gpt4_32k_0314:
+            return 32768
         case .gpt3_5Turbo:
             return 4096
         case .gpt3_5Turbo_16k:
             return 16384
-        case .embeddings, .embeddingsV3, .embeddingsV3Large:
+        case .gpt3_5Turbo_0301:
+            return 4096
+        case .textEmbeddingAda002, .textSearchAda001, .textEmbeddingV3Small, .textEmbeddingV3Large:
             return 8191
         default:
             return 4096
@@ -78,10 +88,10 @@ public extension OpenAIModel {
     /// The default purpose/capability of the model
     var purpose: ModelPurpose {
         switch self {
-        case .gpt4, .gpt4Turbo, .gpt4Vision, .gpt4_32k,
-             .gpt3_5Turbo, .gpt3_5Turbo_16k:
+        case .gpt4, .gpt4Turbo, .gpt4Vision, .gpt4_32k, .gpt4_0314, .gpt4_32k_0314,
+             .gpt3_5Turbo, .gpt3_5Turbo_16k, .gpt3_5Turbo_0301:
             return .chatCompletion
-        case .embeddings, .embeddingsV3, .embeddingsV3Large:
+        case .textEmbeddingAda002, .textSearchAda001, .textEmbeddingV3Small, .textEmbeddingV3Large:
             return .embedding
         case .dalle2, .dalle3:
             return .imageGeneration
@@ -113,7 +123,7 @@ public extension OpenAIModel {
         case .chatCompletion:
             return .gpt3_5Turbo
         case .embedding:
-            return .embeddings
+            return .textEmbeddingAda002
         case .imageGeneration:
             return .dalle3
         case .audioTranscription:

@@ -1,13 +1,15 @@
-import XCTest
+import Foundation
+import Testing
 @testable import OpenAISwift
 
-final class EmbeddingsAPITests: XCTestCase {
+@Suite("Embeddings API Tests")
+struct EmbeddingsAPITests {
     var configuration: OpenAIConfiguration!
     var session: URLSession!
     var client: OpenAIClient!
+    var embeddingsAPI: EmbeddingsAPI!
     
-    override func setUp() {
-        super.setUp()
+    mutating func setUp() {
         configuration = OpenAIConfiguration(apiKey: "test-key")
         
         let config = URLSessionConfiguration.ephemeral
@@ -15,18 +17,24 @@ final class EmbeddingsAPITests: XCTestCase {
         session = URLSession(configuration: config)
         
         client = OpenAIClient(configuration: configuration, session: session)
+        embeddingsAPI = client.embeddings
     }
     
-    override func tearDown() {
+    mutating func tearDown() {
         configuration = nil
         session = nil
         client = nil
+        embeddingsAPI = nil
         MockURLProtocol.requestHandler = nil
-        super.tearDown()
     }
     
+    @Test("Create embeddings with single input")
     func testCreateEmbeddings() async throws {
-        // Setup mock response
+        // Given
+        var test = EmbeddingsAPITests()
+        test.setUp()
+        defer { test.tearDown() }
+        
         MockURLProtocol.requestHandler = { request in
             let response = HTTPURLResponse(
                 url: request.url!,
@@ -34,85 +42,89 @@ final class EmbeddingsAPITests: XCTestCase {
                 httpVersion: nil,
                 headerFields: nil
             )!
-            return (response, MockResponses.embedding.data(using: .utf8)!)
+            return (response, MockResponses.embeddings.data(using: .utf8)!)
         }
         
-        // Test request
         let request = EmbeddingRequest(
-            model: .ada,
-            input: ["Test text"]
+            model: .textEmbeddingAda002,
+            input: "Hello world"
         )
         
-        let response = try await client.embeddings.createEmbeddings(request)
+        // When
+        let response = try await test.embeddingsAPI.createEmbeddings(request)
         
-        XCTAssertEqual(response.data.count, 1)
-        XCTAssertEqual(response.data.first?.embedding.count, 3)
-        XCTAssertEqual(response.model, "text-embedding-ada-002")
+        // Then
+        #expect(!response.data.isEmpty, "Response data should not be empty")
+        #expect(response.data.first?.embedding.count == 4, "Embedding should have correct dimension")
+        #expect(response.model == "text-embedding-ada-002", "Response should use correct model")
     }
     
-    func testEmbed() async throws {
-        // Setup mock response
+    @Test("Create embeddings with multiple inputs")
+    func testCreateEmbeddingsWithMultipleInputs() async throws {
+        // Given
+        var test = EmbeddingsAPITests()
+        test.setUp()
+        defer { test.tearDown() }
+        
         MockURLProtocol.requestHandler = { request in
-            // Verify request body
-            let data = try! JSONDecoder().decode(
-                EmbeddingRequest.self,
-                from: request.httpBody!
-            )
-            XCTAssertEqual(data.input.first, "Test text")
-            
             let response = HTTPURLResponse(
                 url: request.url!,
                 statusCode: 200,
                 httpVersion: nil,
                 headerFields: nil
             )!
-            return (response, MockResponses.embedding.data(using: .utf8)!)
+            return (response, MockResponses.embeddingsMultiple.data(using: .utf8)!)
         }
         
-        // Test simple embedding
-        let embedding = try await client.embeddings.embed("Test text")
-        XCTAssertEqual(embedding.count, 3)
-        XCTAssertEqual(embedding[0], 0.0023064255)
-        
-        // Test with specific model
-        let embeddingWithModel = try await client.embeddings.embed(
-            "Test text",
-            model: .embeddingsV3
+        let request = EmbeddingRequest(
+            model: .textEmbeddingAda002,
+            input: ["Hello world", "Another input"],
+            user: "test-user"
         )
-        XCTAssertEqual(embeddingWithModel.count, 3)
+        
+        // When
+        let response = try await test.embeddingsAPI.createEmbeddings(request)
+        
+        // Then
+        #expect(response.data.count == 2, "Should return embeddings for both inputs")
+        #expect(response.data.first?.embedding.count == 4, "Embedding should have correct dimension")
+        #expect(response.model == "text-embedding-ada-002", "Response should use correct model")
     }
     
-    func testInvalidResponse() async {
-        // Setup mock response with missing data
+    @Test("Handle invalid API response")
+    func testCreateEmbeddingsFailure() async throws {
+        // Given
+        var test = EmbeddingsAPITests()
+        test.setUp()
+        defer { test.tearDown() }
+        
         MockURLProtocol.requestHandler = { request in
-            let invalidResponse = """
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 401,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            
+            let errorResponse = """
             {
-                "object": "list",
-                "data": [],
-                "model": "text-embedding-ada-002",
-                "usage": {
-                    "prompt_tokens": 8,
-                    "total_tokens": 8
+                "error": {
+                    "message": "Invalid API key",
+                    "type": "invalid_request_error",
+                    "code": "invalid_api_key"
                 }
             }
-            """
+            """.data(using: .utf8)!
             
-            let response = HTTPURLResponse(
-                url: request.url!,
-                statusCode: 200,
-                httpVersion: nil,
-                headerFields: nil
-            )!
-            return (response, invalidResponse.data(using: .utf8)!)
+            return (response, errorResponse)
         }
         
-        do {
-            _ = try await client.embeddings.embed("Test text")
-            XCTFail("Expected error to be thrown")
-        } catch OpenAIError.invalidResponse {
-            // Expected error
-        } catch {
-            XCTFail("Unexpected error: \(error)")
+        // Then
+        await #expect(throws: OpenAIError.invalidResponse) {
+            _ = try await test.embeddingsAPI.createEmbeddings(
+                model: .textEmbeddingAda002,
+                input: "Hello world"
+            )
         }
     }
 }

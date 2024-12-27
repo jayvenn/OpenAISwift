@@ -7,11 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B94EEB4B2D1DF63D001F53FD /* OpenAISwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B94EEB422D1DF63D001F53FD /* OpenAISwift.framework */; };
+		B94EEC0C2D1E5311001F53FD /* OpenAISwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B94EEB422D1DF63D001F53FD /* OpenAISwift.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		B94EEB4C2D1DF63D001F53FD /* PBXContainerItemProxy */ = {
+		B94EEC0D2D1E5311001F53FD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = B94EEB392D1DF63D001F53FD /* Project object */;
 			proxyType = 1;
@@ -22,7 +22,7 @@
 
 /* Begin PBXFileReference section */
 		B94EEB422D1DF63D001F53FD /* OpenAISwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OpenAISwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		B94EEB4A2D1DF63D001F53FD /* OpenAISwiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OpenAISwiftTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B94EEC082D1E5311001F53FD /* OpenAISwiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OpenAISwiftTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -32,6 +32,21 @@
 				OpenAISwift.h,
 			);
 			target = B94EEB412D1DF63D001F53FD /* OpenAISwift */;
+		};
+		B94EEC122D1E5321001F53FD /* Exceptions for "OpenAISwiftTests" folder in "OpenAISwiftTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Config/EnvironmentLoader.swift,
+				Core/OpenAIClientTests.swift,
+				Core/TestError.swift,
+				Features/ChatAPITests.swift,
+				Features/EmbeddingsAPITests.swift,
+				LiveTests/ChatAPILiveTests.swift,
+				LiveTests/EmbeddingsAPILiveTests.swift,
+				Mocks/MockResponses.swift,
+				Mocks/MockURLProtocol.swift,
+			);
+			target = B94EEC072D1E5311001F53FD /* OpenAISwiftTests */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -44,8 +59,11 @@
 			path = OpenAISwift;
 			sourceTree = "<group>";
 		};
-		B94EEB4E2D1DF63D001F53FD /* OpenAISwiftTests */ = {
+		B94EEC092D1E5311001F53FD /* OpenAISwiftTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				B94EEC122D1E5321001F53FD /* Exceptions for "OpenAISwiftTests" folder in "OpenAISwiftTests" target */,
+			);
 			path = OpenAISwiftTests;
 			sourceTree = "<group>";
 		};
@@ -59,11 +77,11 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B94EEB472D1DF63D001F53FD /* Frameworks */ = {
+		B94EEC052D1E5311001F53FD /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B94EEB4B2D1DF63D001F53FD /* OpenAISwift.framework in Frameworks */,
+				B94EEC0C2D1E5311001F53FD /* OpenAISwift.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -74,7 +92,7 @@
 			isa = PBXGroup;
 			children = (
 				B94EEB442D1DF63D001F53FD /* OpenAISwift */,
-				B94EEB4E2D1DF63D001F53FD /* OpenAISwiftTests */,
+				B94EEC092D1E5311001F53FD /* OpenAISwiftTests */,
 				B94EEB432D1DF63D001F53FD /* Products */,
 			);
 			sourceTree = "<group>";
@@ -83,7 +101,7 @@
 			isa = PBXGroup;
 			children = (
 				B94EEB422D1DF63D001F53FD /* OpenAISwift.framework */,
-				B94EEB4A2D1DF63D001F53FD /* OpenAISwiftTests.xctest */,
+				B94EEC082D1E5311001F53FD /* OpenAISwiftTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -124,27 +142,27 @@
 			productReference = B94EEB422D1DF63D001F53FD /* OpenAISwift.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		B94EEB492D1DF63D001F53FD /* OpenAISwiftTests */ = {
+		B94EEC072D1E5311001F53FD /* OpenAISwiftTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B94EEB582D1DF63D001F53FD /* Build configuration list for PBXNativeTarget "OpenAISwiftTests" */;
+			buildConfigurationList = B94EEC0F2D1E5311001F53FD /* Build configuration list for PBXNativeTarget "OpenAISwiftTests" */;
 			buildPhases = (
-				B94EEB462D1DF63D001F53FD /* Sources */,
-				B94EEB472D1DF63D001F53FD /* Frameworks */,
-				B94EEB482D1DF63D001F53FD /* Resources */,
+				B94EEC042D1E5311001F53FD /* Sources */,
+				B94EEC052D1E5311001F53FD /* Frameworks */,
+				B94EEC062D1E5311001F53FD /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				B94EEB4D2D1DF63D001F53FD /* PBXTargetDependency */,
+				B94EEC0E2D1E5311001F53FD /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				B94EEB4E2D1DF63D001F53FD /* OpenAISwiftTests */,
+				B94EEC092D1E5311001F53FD /* OpenAISwiftTests */,
 			);
 			name = OpenAISwiftTests;
 			packageProductDependencies = (
 			);
 			productName = OpenAISwiftTests;
-			productReference = B94EEB4A2D1DF63D001F53FD /* OpenAISwiftTests.xctest */;
+			productReference = B94EEC082D1E5311001F53FD /* OpenAISwiftTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -161,7 +179,7 @@
 						CreatedOnToolsVersion = 16.2;
 						LastSwiftMigration = 1620;
 					};
-					B94EEB492D1DF63D001F53FD = {
+					B94EEC072D1E5311001F53FD = {
 						CreatedOnToolsVersion = 16.2;
 					};
 				};
@@ -181,7 +199,7 @@
 			projectRoot = "";
 			targets = (
 				B94EEB412D1DF63D001F53FD /* OpenAISwift */,
-				B94EEB492D1DF63D001F53FD /* OpenAISwiftTests */,
+				B94EEC072D1E5311001F53FD /* OpenAISwiftTests */,
 			);
 		};
 /* End PBXProject section */
@@ -194,7 +212,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B94EEB482D1DF63D001F53FD /* Resources */ = {
+		B94EEC062D1E5311001F53FD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -211,7 +229,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B94EEB462D1DF63D001F53FD /* Sources */ = {
+		B94EEC042D1E5311001F53FD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -221,10 +239,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		B94EEB4D2D1DF63D001F53FD /* PBXTargetDependency */ = {
+		B94EEC0E2D1E5311001F53FD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = B94EEB412D1DF63D001F53FD /* OpenAISwift */;
-			targetProxy = B94EEB4C2D1DF63D001F53FD /* PBXContainerItemProxy */;
+			targetProxy = B94EEC0D2D1E5311001F53FD /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -267,7 +285,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_INSTALL_OBJC_HEADER = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
 				XROS_DEPLOYMENT_TARGET = 1.0;
 			};
@@ -310,7 +328,7 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_INSTALL_OBJC_HEADER = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
 				XROS_DEPLOYMENT_TARGET = 1.0;
 			};
@@ -375,6 +393,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -431,15 +450,15 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 6.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
 			name = Release;
 		};
-		B94EEB592D1DF63D001F53FD /* Debug */ = {
+		B94EEC102D1E5311001F53FD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6897VAM74N;
@@ -458,10 +477,9 @@
 			};
 			name = Debug;
 		};
-		B94EEB5A2D1DF63D001F53FD /* Release */ = {
+		B94EEC112D1E5311001F53FD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6897VAM74N;
@@ -501,11 +519,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B94EEB582D1DF63D001F53FD /* Build configuration list for PBXNativeTarget "OpenAISwiftTests" */ = {
+		B94EEC0F2D1E5311001F53FD /* Build configuration list for PBXNativeTarget "OpenAISwiftTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B94EEB592D1DF63D001F53FD /* Debug */,
-				B94EEB5A2D1DF63D001F53FD /* Release */,
+				B94EEC102D1E5311001F53FD /* Debug */,
+				B94EEC112D1E5311001F53FD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

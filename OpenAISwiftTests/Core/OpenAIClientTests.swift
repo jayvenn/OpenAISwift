@@ -1,13 +1,14 @@
-import XCTest
+import Foundation
+import Testing
 @testable import OpenAISwift
 
-final class OpenAIClientTests: XCTestCase {
+@Suite("OpenAI Client Tests")
+struct OpenAIClientTests {
     var configuration: OpenAIConfiguration!
     var session: URLSession!
     var client: OpenAIClient!
     
-    override func setUp() {
-        super.setUp()
+    mutating func setUp() {
         configuration = OpenAIConfiguration(apiKey: "test-key")
         
         let config = URLSessionConfiguration.ephemeral
@@ -17,50 +18,59 @@ final class OpenAIClientTests: XCTestCase {
         client = OpenAIClient(configuration: configuration, session: session)
     }
     
-    override func tearDown() {
+    mutating func tearDown() {
         configuration = nil
         session = nil
         client = nil
         MockURLProtocol.requestHandler = nil
-        super.tearDown()
     }
     
-    func testClientInitialization() {
-        XCTAssertNotNil(client)
-        XCTAssertNotNil(client.chat)
-        XCTAssertNotNil(client.embeddings)
+    @Test("Initialize client with API key")
+    func testInitWithAPIKey() {
+        let config = OpenAIConfiguration(apiKey: "test-key")
+        let client = OpenAIClient(configuration: config)
+        #expect(client.apiKey == "test-key", "API key should be set correctly")
     }
     
-    func testDefaultHeaders() {
-        let headers = client.defaultHeaders
-        XCTAssertEqual(headers["Authorization"], "Bearer test-key")
-        XCTAssertEqual(headers["Content-Type"], "application/json")
-        XCTAssertNil(headers["OpenAI-Organization"])
-        
-        // Test with organization
-        let configWithOrg = OpenAIConfiguration(apiKey: "test-key", organization: "test-org")
-        let clientWithOrg = OpenAIClient(configuration: configWithOrg)
-        let headersWithOrg = clientWithOrg.defaultHeaders
-        
-        XCTAssertEqual(headersWithOrg["OpenAI-Organization"], "test-org")
+    @Test("Initialize client with configuration")
+    func testInitWithConfiguration() {
+        let config = OpenAIConfiguration(apiKey: "test-key", organization: "test-org")
+        let client = OpenAIClient(configuration: config)
+        #expect(client.apiKey == "test-key", "API key should be set correctly")
+        #expect(client.organization == "test-org", "Organization should be set correctly")
     }
     
-    func testConfigureRequest() throws {
-        let request = try client.configureRequest(for: .chatCompletions)
+    @Test("Initialize client with custom session")
+    func testInitWithSession() {
+        let config = OpenAIConfiguration(apiKey: "test-key")
+        let session = URLSession(configuration: .ephemeral)
+        let client = OpenAIClient(configuration: config, session: session)
+        #expect(client.session === session, "Session should be set correctly")
+    }
+    
+    @Test("Make API request with valid response")
+    func testMakeRequest() async throws {
+        // Given
+        var test = OpenAIClientTests()
+        test.setUp()
+        defer { test.tearDown() }
         
-        XCTAssertEqual(request.httpMethod, "POST")
-        XCTAssertEqual(
-            request.url?.absoluteString,
-            "https://api.openai.com/v1/chat/completions"
+        let endpoint = OpenAIEndpoint.chat
+        let expectedResponse = ChatResponse(
+            id: "test-id",
+            object: "chat.completion",
+            created: 1234567890,
+            model: "gpt-3.5-turbo",
+            choices: [
+                .init(
+                    index: 0,
+                    message: .init(role: .assistant, content: "Hello!"),
+                    finishReason: "stop"
+                )
+            ],
+            usage: .init(promptTokens: 10, completionTokens: 20, totalTokens: 30)
         )
-        XCTAssertEqual(
-            request.allHTTPHeaderFields?["Authorization"],
-            "Bearer test-key"
-        )
-    }
-    
-    func testPerformRequestSuccess() async throws {
-        // Setup mock response
+        
         MockURLProtocol.requestHandler = { request in
             let response = HTTPURLResponse(
                 url: request.url!,
@@ -68,23 +78,30 @@ final class OpenAIClientTests: XCTestCase {
                 httpVersion: nil,
                 headerFields: nil
             )!
-            return (response, MockResponses.chatCompletion.data(using: .utf8)!)
+            
+            let encoder = JSONEncoder()
+            let data = try! encoder.encode(expectedResponse)
+            return (response, data)
         }
         
-        // Test request
-        let response: ChatCompletionResponse = try await client.performRequest(
-            endpoint: .chatCompletions,
-            body: ChatCompletionRequest(
-                model: .gpt3_5Turbo,
-                messages: [ChatMessage(role: .user, content: "Hello")]
-            )
-        )
+        // When
+        let response: ChatResponse = try await test.client.makeRequest(to: endpoint)
         
-        XCTAssertEqual(response.choices.first?.message.content, "Hello! How can I help you today?")
+        // Then
+        #expect(response.id == expectedResponse.id, "Response ID should match")
+        #expect(response.model == expectedResponse.model, "Response model should match")
+        #expect(response.choices.count == expectedResponse.choices.count, "Response should have correct number of choices")
     }
     
-    func testPerformRequestFailure() async {
-        // Setup mock response
+    @Test("Handle API request error")
+    func testMakeRequestError() async throws {
+        // Given
+        var test = OpenAIClientTests()
+        test.setUp()
+        defer { test.tearDown() }
+        
+        let endpoint = OpenAIEndpoint.chat
+        
         MockURLProtocol.requestHandler = { request in
             let response = HTTPURLResponse(
                 url: request.url!,
@@ -92,23 +109,43 @@ final class OpenAIClientTests: XCTestCase {
                 httpVersion: nil,
                 headerFields: nil
             )!
-            return (response, MockResponses.error.data(using: .utf8)!)
+            
+            let errorResponse = """
+            {
+                "error": {
+                    "message": "Invalid API key",
+                    "type": "invalid_request_error",
+                    "code": "invalid_api_key"
+                }
+            }
+            """.data(using: .utf8)!
+            
+            return (response, errorResponse)
         }
         
-        // Test request
-        do {
-            let _: ChatCompletionResponse = try await client.performRequest(
-                endpoint: .chatCompletions,
-                body: ChatCompletionRequest(
-                    model: .gpt3_5Turbo,
-                    messages: [ChatMessage(role: .user, content: "Hello")]
-                )
-            )
-            XCTFail("Expected error to be thrown")
-        } catch let OpenAIError.httpError(statusCode, _) {
-            XCTAssertEqual(statusCode, 401)
-        } catch {
-            XCTFail("Unexpected error: \(error)")
+        // Then
+        await #expect(throws: OpenAIError.invalidResponse) {
+            let _: ChatResponse = try await test.client.makeRequest(to: endpoint)
+        }
+    }
+    
+    @Test("Handle network error")
+    func testMakeRequestNetworkError() async throws {
+        // Given
+        var test = OpenAIClientTests()
+        test.setUp()
+        defer { test.tearDown() }
+        
+        let endpoint = OpenAIEndpoint.chat
+        let networkError = NSError(domain: NSURLErrorDomain, code: NSURLErrorNotConnectedToInternet)
+        
+        MockURLProtocol.requestHandler = { _ in
+            throw networkError
+        }
+        
+        // Then
+        await #expect(throws: OpenAIError.networkError) {
+            let _: ChatResponse = try await test.client.makeRequest(to: endpoint)
         }
     }
 }

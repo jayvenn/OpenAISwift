@@ -1,67 +1,58 @@
 import Foundation
 
-/// Represents all available OpenAI API endpoints
+/// Represents an OpenAI API endpoint
 public enum OpenAIEndpoint {
-    // MARK: - Chat Endpoints
+    /// Chat completions endpoint
     case chatCompletions
     
-    // MARK: - Embedding Endpoints
+    /// Embeddings endpoint
     case embeddings
     
-    // MARK: - Image Endpoints
+    /// Image generations endpoint
     case imageGenerations
+    
+    /// Image edits endpoint
     case imageEdits
+    
+    /// Image variations endpoint
     case imageVariations
     
-    // MARK: - Audio Endpoints
+    /// Audio transcriptions endpoint
     case audioTranscriptions
+    
+    /// Audio translations endpoint
     case audioTranslations
-    case audioSpeech
     
-    // MARK: - File Endpoints
+    /// Files endpoint
     case files
-    case fileContent(String)
-    case fileDelete(String)
     
-    // MARK: - Fine-tuning Endpoints
-    case fineTuningJobs
-    case fineTuningJobCancel(String)
-    case fineTuningJobEvents(String)
+    /// Fine-tunes endpoint
+    case fineTunes
     
-    // MARK: - Moderation Endpoints
+    /// Fine-tune events endpoint
+    case fineTuneEvents(String)
+    
+    /// Completions endpoint
+    case completions
+    
+    /// Models endpoint
+    case models
+    
+    /// Model endpoint
+    case model(String)
+    
+    /// Moderations endpoint
     case moderations
-    
-    // MARK: - Assistants API Endpoints
-    case assistants
-    case assistant(String)
-    case assistantFiles(String)
-    case threads
-    case thread(String)
-    case threadMessages(String)
-    case threadRuns(String)
-    case threadRunSteps(String, String)
     
     /// The HTTP method to use for this endpoint
     public var method: HTTPMethod {
         switch self {
         case .chatCompletions, .embeddings, .imageGenerations,
              .imageEdits, .imageVariations, .audioTranscriptions,
-             .audioTranslations, .audioSpeech, .files,
-             .fineTuningJobs, .moderations, .assistants,
-             .assistantFiles, .threads, .threadMessages,
-             .threadRuns:
+             .audioTranslations, .completions, .moderations:
             return .post
-            
-        case .fileContent, .fineTuningJobEvents:
-            return .get
-            
-        case .fileDelete, .assistant, .thread:
-            return .delete
-            
-        case .fineTuningJobCancel:
-            return .post
-            
-        case .threadRunSteps:
+        case .files, .fineTunes, .fineTuneEvents,
+             .models, .model:
             return .get
         }
     }
@@ -83,47 +74,25 @@ public enum OpenAIEndpoint {
             return "/audio/transcriptions"
         case .audioTranslations:
             return "/audio/translations"
-        case .audioSpeech:
-            return "/audio/speech"
         case .files:
             return "/files"
-        case .fileContent(let fileId):
-            return "/files/\(fileId)/content"
-        case .fileDelete(let fileId):
-            return "/files/\(fileId)"
-        case .fineTuningJobs:
-            return "/fine_tuning/jobs"
-        case .fineTuningJobCancel(let jobId):
-            return "/fine_tuning/jobs/\(jobId)/cancel"
-        case .fineTuningJobEvents(let jobId):
-            return "/fine_tuning/jobs/\(jobId)/events"
+        case .fineTunes:
+            return "/fine-tunes"
+        case .fineTuneEvents(let id):
+            return "/fine-tunes/\(id)/events"
+        case .completions:
+            return "/completions"
+        case .models:
+            return "/models"
+        case .model(let id):
+            return "/models/\(id)"
         case .moderations:
             return "/moderations"
-        case .assistants:
-            return "/assistants"
-        case .assistant(let assistantId):
-            return "/assistants/\(assistantId)"
-        case .assistantFiles(let assistantId):
-            return "/assistants/\(assistantId)/files"
-        case .threads:
-            return "/threads"
-        case .thread(let threadId):
-            return "/threads/\(threadId)"
-        case .threadMessages(let threadId):
-            return "/threads/\(threadId)/messages"
-        case .threadRuns(let threadId):
-            return "/threads/\(threadId)/runs"
-        case .threadRunSteps(let threadId, let runId):
-            return "/threads/\(threadId)/runs/\(runId)/steps"
         }
     }
-}
-
-/// HTTP methods supported by the OpenAI API
-public enum HTTPMethod: String {
-    case get = "GET"
-    case post = "POST"
-    case delete = "DELETE"
-    case put = "PUT"
-    case patch = "PATCH"
+    
+    /// The full URL for this endpoint
+    public func url(baseURL: URL) -> URL {
+        return baseURL.appendingPathComponent(path)
+    }
 }

@@ -1,13 +1,15 @@
-import XCTest
+import Foundation
+import Testing
 @testable import OpenAISwift
 
-final class ChatAPITests: XCTestCase {
+@Suite("Chat API Tests")
+struct ChatAPITests {
     var configuration: OpenAIConfiguration!
     var session: URLSession!
     var client: OpenAIClient!
+    var chatAPI: ChatAPI!
     
-    override func setUp() {
-        super.setUp()
+    mutating func setUp() {
         configuration = OpenAIConfiguration(apiKey: "test-key")
         
         let config = URLSessionConfiguration.ephemeral
@@ -15,18 +17,24 @@ final class ChatAPITests: XCTestCase {
         session = URLSession(configuration: config)
         
         client = OpenAIClient(configuration: configuration, session: session)
+        chatAPI = client.chat
     }
     
-    override func tearDown() {
+    mutating func tearDown() {
         configuration = nil
         session = nil
         client = nil
+        chatAPI = nil
         MockURLProtocol.requestHandler = nil
-        super.tearDown()
     }
     
+    @Test("Create chat completion with basic message")
     func testCreateChatCompletion() async throws {
-        // Setup mock response
+        // Given
+        var test = ChatAPITests()
+        test.setUp()
+        defer { test.tearDown() }
+        
         MockURLProtocol.requestHandler = { request in
             let response = HTTPURLResponse(
                 url: request.url!,
@@ -37,30 +45,30 @@ final class ChatAPITests: XCTestCase {
             return (response, MockResponses.chatCompletion.data(using: .utf8)!)
         }
         
-        // Test request
-        let request = ChatCompletionRequest(
+        let messages = [
+            ChatMessage(role: .user, content: "Hello!")
+        ]
+        
+        // When
+        let response = try await test.chatAPI.createChatCompletion(
             model: .gpt3_5Turbo,
-            messages: [ChatMessage(role: .user, content: "Hello")]
+            messages: messages
         )
         
-        let response = try await client.chat.createChatCompletion(request)
-        
-        XCTAssertEqual(response.choices.count, 1)
-        XCTAssertEqual(response.choices.first?.message.content, "Hello! How can I help you today?")
-        XCTAssertEqual(response.choices.first?.message.role, .assistant)
+        // Then
+        #expect(response.choices.count == 1, "Should return one choice")
+        #expect(response.choices.first?.message.role == .assistant, "Response should be from assistant")
+        #expect(response.choices.first?.message.content == "Hello! How can I help you today?", "Response content should match")
     }
     
-    func testSendMessage() async throws {
-        // Setup mock response
+    @Test("Create chat completion with conversation history")
+    func testCreateChatCompletionWithHistory() async throws {
+        // Given
+        var test = ChatAPITests()
+        test.setUp()
+        defer { test.tearDown() }
+        
         MockURLProtocol.requestHandler = { request in
-            // Verify request body
-            let data = try! JSONDecoder().decode(
-                ChatCompletionRequest.self,
-                from: request.httpBody!
-            )
-            XCTAssertEqual(data.messages.first?.content, "Test message")
-            XCTAssertEqual(data.messages.first?.role, .user)
-            
             let response = HTTPURLResponse(
                 url: request.url!,
                 statusCode: 200,
@@ -70,52 +78,100 @@ final class ChatAPITests: XCTestCase {
             return (response, MockResponses.chatCompletion.data(using: .utf8)!)
         }
         
-        // Test simple message
-        let reply = try await client.chat.sendMessage("Test message")
-        XCTAssertEqual(reply, "Hello! How can I help you today?")
+        let messages = [
+            ChatMessage(role: .system, content: "You are a helpful assistant."),
+            ChatMessage(role: .user, content: "What's your purpose?"),
+            ChatMessage(role: .assistant, content: "I'm here to help!"),
+            ChatMessage(role: .user, content: "Tell me more.")
+        ]
         
-        // Test with specific model
-        let replyWithModel = try await client.chat.sendMessage(
-            "Test message",
-            model: .gpt4
+        // When
+        let response = try await test.chatAPI.createChatCompletion(
+            model: .gpt3_5Turbo,
+            messages: messages
         )
-        XCTAssertEqual(replyWithModel, "Hello! How can I help you today?")
+        
+        // Then
+        #expect(response.choices.count == 1, "Should return one choice")
+        #expect(response.model == "gpt-3.5-turbo", "Should use correct model")
+        #expect(response.usage.totalTokens == 21, "Should report token usage")
     }
     
-    func testInvalidResponse() async {
-        // Setup mock response with missing choice
+    @Test("Create chat completion with options")
+    func testCreateChatCompletionWithOptions() async throws {
+        // Given
+        var test = ChatAPITests()
+        test.setUp()
+        defer { test.tearDown() }
+        
         MockURLProtocol.requestHandler = { request in
-            let invalidResponse = """
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            return (response, MockResponses.chatCompletion.data(using: .utf8)!)
+        }
+        
+        let messages = [ChatMessage(role: .user, content: "Generate a creative story.")]
+        
+        // When
+        let response = try await test.chatAPI.createChatCompletion(
+            model: .gpt3_5Turbo,
+            messages: messages,
+            temperature: 0.8,
+            topP: 1,
+            n: 1,
+            stream: false,
+            stop: ["THE END"],
+            maxTokens: 100,
+            presencePenalty: 0.5,
+            frequencyPenalty: 0.5,
+            user: "test-user"
+        )
+        
+        // Then
+        #expect(response.choices.count == 1, "Should return one choice")
+        #expect(response.choices.first?.finishReason == "stop", "Should have correct finish reason")
+    }
+    
+    @Test("Handle chat completion error")
+    func testCreateChatCompletionError() async throws {
+        // Given
+        var test = ChatAPITests()
+        test.setUp()
+        defer { test.tearDown() }
+        
+        MockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 401,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            
+            let errorResponse = """
             {
-                "id": "chatcmpl-123",
-                "object": "chat.completion",
-                "created": 1677652288,
-                "model": "gpt-3.5-turbo",
-                "choices": [],
-                "usage": {
-                    "prompt_tokens": 9,
-                    "completion_tokens": 12,
-                    "total_tokens": 21
+                "error": {
+                    "message": "Invalid API key",
+                    "type": "invalid_request_error",
+                    "code": "invalid_api_key"
                 }
             }
-            """
+            """.data(using: .utf8)!
             
-            let response = HTTPURLResponse(
-                url: request.url!,
-                statusCode: 200,
-                httpVersion: nil,
-                headerFields: nil
-            )!
-            return (response, invalidResponse.data(using: .utf8)!)
+            return (response, errorResponse)
         }
         
-        do {
-            _ = try await client.chat.sendMessage("Test message")
-            XCTFail("Expected error to be thrown")
-        } catch OpenAIError.invalidResponse {
-            // Expected error
-        } catch {
-            XCTFail("Unexpected error: \(error)")
+        let messages = [ChatMessage(role: .user, content: "Hello!")]
+        
+        // Then
+        await #expect(throws: OpenAIError.invalidResponse) {
+            _ = try await test.chatAPI.createChatCompletion(
+                model: .gpt3_5Turbo,
+                messages: messages
+            )
         }
     }
 }

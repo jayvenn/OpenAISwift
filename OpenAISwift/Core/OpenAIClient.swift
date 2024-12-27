@@ -8,6 +8,12 @@ public final class OpenAIClient {
     /// URLSession for making network requests
     private let session: URLSession
     
+    /// The API key used for authentication
+    public var apiKey: String { configuration.apiKey }
+    
+    /// Optional organization ID
+    public var organization: String? { configuration.organization }
+    
     // MARK: - Features
     
     /// Chat completion API

@@ -1,46 +1,53 @@
-import XCTest
+import Foundation
+import Testing
 @testable import OpenAISwift
 
-/// Live tests for the Embeddings API
-/// These tests make actual API calls and require a valid API key in TestConfig
-final class EmbeddingsAPILiveTests: XCTestCase {
+@Suite("Embeddings API Live Tests")
+struct EmbeddingsAPILiveTests {
     var client: OpenAIClient!
+    var embeddingsAPI: EmbeddingsAPI!
     
-    override func setUp() {
-        super.setUp()
-        let config = OpenAIConfiguration(
-            apiKey: TestConfig.apiKey,
-            organization: TestConfig.organization,
-            baseURL: TestConfig.baseURL,
-            timeoutInterval: TestConfig.timeoutInterval
-        )
+    mutating func setUp() throws {
+        guard let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] else {
+            throw TestError("OPENAI_API_KEY environment variable not set")
+        }
+        
+        let config = OpenAIConfiguration(apiKey: apiKey)
         client = OpenAIClient(configuration: config)
+        embeddingsAPI = client.embeddings
     }
     
-    override func tearDown() {
-        client = nil
-        super.tearDown()
-    }
-    
-    func testSimpleEmbedding() async throws {
-        // This test makes a real API call
-        let text = "Hello, World!"
-        let embedding = try await client.embeddings.embed(text)
-        
-        XCTAssertFalse(embedding.isEmpty)
-        print("Embedding dimension: \(embedding.count)")
-        print("First few values: \(embedding.prefix(5))")
-    }
-    
-    func testCustomModel() async throws {
-        // This test makes a real API call with a specific model
-        let text = "Testing embeddings"
-        let embedding = try await client.embeddings.embed(
-            text,
-            model: .ada
+    @Test("Create embeddings with single input")
+    func testCreateEmbeddings() async throws {
+        let request = EmbeddingRequest(
+            model: .textEmbeddingAda002,
+            input: "Hello world"
         )
         
-        XCTAssertFalse(embedding.isEmpty)
-        print("Ada Embedding dimension: \(embedding.count)")
+        let response = try await embeddingsAPI.createEmbeddings(request)
+        #expect(!response.data.isEmpty)
+    }
+    
+    @Test("Create embeddings with multiple inputs")
+    func testCreateEmbeddingsWithMultipleInputs() async throws {
+        let request = EmbeddingRequest(
+            model: .textEmbeddingAda002,
+            input: ["Hello world", "Another test input"]
+        )
+        
+        let response = try await embeddingsAPI.createEmbeddings(request)
+        #expect(response.data.count == 2)
+    }
+    
+    @Test("Create embeddings with user identifier")
+    func testCreateEmbeddingsWithUser() async throws {
+        let request = EmbeddingRequest(
+            model: .textEmbeddingAda002,
+            input: "Hello world",
+            user: "test-user"
+        )
+        
+        let response = try await embeddingsAPI.createEmbeddings(request)
+        #expect(!response.data.isEmpty)
     }
 }

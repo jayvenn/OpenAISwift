@@ -1,4 +1,5 @@
 import Foundation
+@testable import OpenAISwift
 
 /// Mock URL Protocol for testing network requests
 class MockURLProtocol: URLProtocol {
@@ -27,7 +28,5 @@ class MockURLProtocol: URLProtocol {
         }
     }
     
-    override func stopLoading() {
-        // No implementation needed
-    }
+    override func stopLoading() {}
 }

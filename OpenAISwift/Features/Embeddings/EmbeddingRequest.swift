@@ -11,11 +11,13 @@ public struct EmbeddingRequest: Codable, Sendable {
     /// A unique identifier representing your end-user
     public let user: String?
     
-    public init(
-        model: OpenAIModel = .defaultModel(for: .embedding),
-        input: [String],
-        user: String? = nil
-    ) {
+    public init(model: OpenAIModel = .textEmbeddingAda002, input: String, user: String? = nil) {
+        self.model = model
+        self.input = [input]
+        self.user = user
+    }
+    
+    public init(model: OpenAIModel = .textEmbeddingAda002, input: [String], user: String? = nil) {
         self.model = model
         self.input = input
         self.user = user
