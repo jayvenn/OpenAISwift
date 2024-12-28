@@ -16,12 +16,14 @@ final class RealTimeEndpoint: NSObject, RealTimeAPI {
     }
     
     func create(_ request: CreateSessionRequest) async throws -> CreateSessionResponse {
-        let endpoint = OpenAIEndpoint.realTimeSessions
-        return try await client.post(to: endpoint, body: request)
+        try await client.performRequest(
+            endpoint: .realTimeSessions,
+            body: request
+        )
     }
     
-    func connect(to session: RealTimeSession, delegate: RealTimeSessionDelegate) {
-        guard let url = URL(string: session.url) else {
+    func connect(to session: RealTimeSession, url: String, delegate: RealTimeSessionDelegate) {
+        guard let url = URL(string: url) else {
             delegate.session(session, didEncounterError: OpenAIError.invalidURL)
             return
         }
@@ -102,16 +104,14 @@ final class RealTimeEndpoint: NSObject, RealTimeAPI {
                         delegate?.session(session, didEncounterError: openAIError)
                     }
                 case .ping:
-                    // Handle ping event if needed
-                    break
+                    break // Handle ping event if needed
                 }
             } catch {
                 delegate?.session(session, didEncounterError: error)
             }
             
         case .data:
-            // Handle binary data if needed
-            break
+            break // Handle binary data if needed
             
         @unknown default:
             break

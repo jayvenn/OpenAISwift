@@ -10,8 +10,9 @@ public protocol RealTimeAPI {
     /// Connect to a real-time session
     /// - Parameters:
     ///   - session: The session to connect to
+    ///   - url: The WebSocket URL to connect to
     ///   - delegate: The delegate to receive session events
-    func connect(to session: RealTimeSession, delegate: RealTimeSessionDelegate)
+    func connect(to session: RealTimeSession, url: String, delegate: RealTimeSessionDelegate)
     
     /// Disconnect from the current session
     func disconnect()
