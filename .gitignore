@@ -12,3 +12,4 @@ OpenAISwiftTests/Config/TestConfig.swift
 .env
 OpenAISwiftDemoApp/DependencyContainer.swift
 OpenAISwiftDemoApp/App/Utils/DependencyContainer.swift
+OpenAISwift.xcodeproj/xcshareddata/xcschemes/OpenAISwiftDemoApp.xcscheme

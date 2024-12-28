@@ -1,3 +1,4 @@
+ 
 //
 //  DependencyContainer.swift
 //  OpenAISwiftDemoApp
@@ -12,9 +13,17 @@ import OpenAISwift
 final class DependencyContainer {
     /// Shared instance of the container
     static let shared = DependencyContainer()
-    
     /// The OpenAI client instance
-    let openAIClient: OpenAIClient = OpenAIClient(apiKey: "YOUR_API_KEY")
+    let openAIClient: OpenAIClient = {
+        let apiKey: String
+        if let environmentAPIKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] {
+            apiKey = environmentAPIKey
+        } else {
+            apiKey = "YOUR_API_KEY"
+        }
+        return OpenAIClient(apiKey: apiKey)
+    }()
     
     private init() {}
 }
+
