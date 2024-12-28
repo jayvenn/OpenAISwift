@@ -15,8 +15,8 @@ public protocol OpenAINetworking {
 
 /// Default implementation of OpenAINetworking using URLSession
 public final class DefaultOpenAINetwork: OpenAINetworking {
-    private let configuration: OpenAIConfiguration
-    private let session: URLSession
+    internal let configuration: OpenAIConfiguration
+    internal let session: URLSession
     
     public init(
         configuration: OpenAIConfiguration,
@@ -26,7 +26,7 @@ public final class DefaultOpenAINetwork: OpenAINetworking {
         self.session = session
     }
     
-    private var defaultHeaders: [String: String] {
+    internal var defaultHeaders: [String: String] {
         var headers = [
             "Authorization": "Bearer \(configuration.apiKey)",
             "Content-Type": "application/json"
@@ -39,7 +39,7 @@ public final class DefaultOpenAINetwork: OpenAINetworking {
         return headers
     }
     
-    private func configureRequest(
+    internal func configureRequest(
         for endpoint: OpenAIEndpoint
     ) throws -> URLRequest {
         let url = configuration.baseURL.appendingPathComponent(endpoint.path)
