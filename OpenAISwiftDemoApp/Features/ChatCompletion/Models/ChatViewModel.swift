@@ -2,13 +2,13 @@ import Foundation
 import OpenAISwift
 import Observation
 
-@Observable
-final class ChatViewModel {
-    var messages: [ChatMessage] = []
-    var currentMessage: String = ""
-    var isLoading = false
-    var isStreaming = false
-    var streamingResponse = ""
+final class ChatViewModel: ObservableObject {
+    @Published var messages: [ChatMessage] = []
+    @Published var currentMessage: String = ""
+    @Published var isLoading = false
+    @Published var isStreaming = false
+    @Published var streamingResponse = ""
+    @Published var error: Error?
     
     private let openAI: OpenAIClient
     private var streamingHandler: StreamingHandler?
@@ -19,42 +19,70 @@ final class ChatViewModel {
     
     @MainActor
     func sendMessage() async {
+        guard !currentMessage.isEmpty else { return }
+        
         let userMessage = ChatMessage(role: .user, content: currentMessage)
         messages.append(userMessage)
         currentMessage = ""
         isLoading = true
+        error = nil
         
         do {
             if isStreaming {
                 try await sendStreamingMessage(userMessage)
             } else {
-                let response = try await openAI.chat.sendMessage(messages, model: .gpt4)
-                messages.append(response)
+                let responseContent = try await openAI.sendMessage(userMessage.content, model: .gpt4)
+                await MainActor.run {
+                    messages.append(.init(role: .assistant, content: responseContent))
+                }
             }
         } catch {
-            print("Error: \(error)")
+            await MainActor.run {
+                self.error = error
+                print("Error in sendMessage: \(error.localizedDescription)")
+            }
         }
         
-        isLoading = false
+        await MainActor.run {
+            isLoading = false
+        }
     }
     
+    @MainActor
     private func sendStreamingMessage(_ message: ChatMessage) async throws {
         streamingResponse = ""
         
         let handler = StreamingHandler(
-            content: { [weak self] in self?.streamingResponse += $0 },
+            content: { [weak self] content in
+                Task { @MainActor [weak self] in
+                    self?.streamingResponse += content
+                }
+            },
             completion: { [weak self] in
-                guard let self else { return }
-                self.messages.append(.init(role: .assistant, content: self.streamingResponse))
-                self.streamingResponse = ""
+                Task { @MainActor [weak self] in
+                    guard let self else { return }
+                    self.messages.append(.init(role: .assistant, content: self.streamingResponse))
+                    self.streamingResponse = ""
+                    self.isLoading = false
+                }
+            },
+            error: { [weak self] error in
+                Task { @MainActor [weak self] in
+                    self?.error = error
+                    self?.isLoading = false
+                }
             }
         )
         
         self.streamingHandler = handler
         
-        try await openAI.sendStreamingMessage(
-            message.content,
+        let request = ChatCompletionRequest(
             model: .gpt4,
+            messages: [message]
+        )
+        
+        try await openAI.createStreamingChatCompletion(
+            request,
             delegate: handler
         )
     }
@@ -63,13 +91,16 @@ final class ChatViewModel {
 private final class StreamingHandler: ChatStreamingDelegate {
     private let onContent: (String) -> Void
     private let onCompletion: () -> Void
+    private let onError: (Error) -> Void
     
     init(
         content: @escaping (String) -> Void,
-        completion: @escaping () -> Void
+        completion: @escaping () -> Void,
+        error: @escaping (Error) -> Void
     ) {
         self.onContent = content
         self.onCompletion = completion
+        self.onError = error
     }
     
     func didReceive(chunk: ChatStreamingResponse) {
@@ -83,6 +114,6 @@ private final class StreamingHandler: ChatStreamingDelegate {
     }
     
     func didError(_ error: Error) {
-        print("Streaming error: \(error)")
+        onError(error)
     }
 }
