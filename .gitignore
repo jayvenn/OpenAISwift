@@ -10,3 +10,4 @@ DerivedData/
 # Ignore test config and environment files
 OpenAISwiftTests/Config/TestConfig.swift
 .env
+OpenAISwiftDemoApp/DependencyContainer.swift
