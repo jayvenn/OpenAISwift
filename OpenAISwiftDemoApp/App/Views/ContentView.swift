@@ -19,7 +19,7 @@ struct ContentView: View {
             ),
             Feature(
                 name: "Image Generation",
-                icon: "photo.artframe.fill",
+                icon: "photo.artframe",
                 destination: AnyView(ImageGenerationView()),
                 description: "Generate images from text descriptions using DALL-E"
             ),
