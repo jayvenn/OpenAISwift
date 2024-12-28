@@ -18,7 +18,7 @@ public struct ChatCompletionRequest: Codable, Sendable {
     public let n: Int?
     
     /// Whether to stream back partial progress
-    public let stream: Bool?
+    public var stream: Bool?
     
     /// Up to 4 sequences where the API will stop generating further tokens
     public let stop: [String]?
