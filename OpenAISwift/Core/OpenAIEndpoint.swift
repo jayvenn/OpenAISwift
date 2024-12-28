@@ -44,15 +44,24 @@ public enum OpenAIEndpoint {
     /// Moderations endpoint
     case moderations
     
+    /// Assistants endpoint
+    case assistants
+    
+    /// Assistant endpoint
+    case assistant(id: String)
+    
+    /// Real-time sessions endpoint
+    case realTimeSessions
+    
     /// The HTTP method to use for this endpoint
     public var method: HTTPMethod {
         switch self {
         case .chatCompletions, .embeddings, .imageGenerations,
              .imageEdits, .imageVariations, .audioTranscriptions,
-             .audioTranslations, .completions, .moderations:
+             .audioTranslations, .moderations, .files, .fineTunes,
+             .completions, .assistants, .realTimeSessions:
             return .post
-        case .files, .fineTunes, .fineTuneEvents,
-             .models, .model:
+        case .models, .model, .fineTuneEvents, .assistant:
             return .get
         }
     }
@@ -61,33 +70,39 @@ public enum OpenAIEndpoint {
     public var path: String {
         switch self {
         case .chatCompletions:
-            return "/chat/completions"
+            return "chat/completions"
         case .embeddings:
-            return "/embeddings"
+            return "embeddings"
         case .imageGenerations:
-            return "/images/generations"
+            return "images/generations"
         case .imageEdits:
-            return "/images/edits"
+            return "images/edits"
         case .imageVariations:
-            return "/images/variations"
+            return "images/variations"
         case .audioTranscriptions:
-            return "/audio/transcriptions"
+            return "audio/transcriptions"
         case .audioTranslations:
-            return "/audio/translations"
+            return "audio/translations"
         case .files:
-            return "/files"
+            return "files"
         case .fineTunes:
-            return "/fine-tunes"
+            return "fine-tunes"
         case .fineTuneEvents(let id):
-            return "/fine-tunes/\(id)/events"
+            return "fine-tunes/\(id)/events"
         case .completions:
-            return "/completions"
+            return "completions"
         case .models:
-            return "/models"
+            return "models"
         case .model(let id):
-            return "/models/\(id)"
+            return "models/\(id)"
         case .moderations:
-            return "/moderations"
+            return "moderations"
+        case .assistants:
+            return "assistants"
+        case .assistant(let id):
+            return "assistants/\(id)"
+        case .realTimeSessions:
+            return "sessions"
         }
     }
     
