@@ -1,5 +1,5 @@
 //
-//  EnvironmentLoader.swift
+//  DependencyContainer.swift
 //  OpenAISwiftDemoApp
 //
 //  Created by Jayven on 28/12/24.
