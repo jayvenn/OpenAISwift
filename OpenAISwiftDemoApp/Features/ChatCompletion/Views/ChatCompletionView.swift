@@ -47,23 +47,20 @@ struct ChatCompletionView: View {
         messages.append(userMessage)
         currentMessage = ""
         isLoading = true
-        
-//        Task {
-//            do {
-//                let response = try await openAI.chat.send(messages: messages)
-//                if let reply = response.choices.first?.message {
-//                    await MainActor.run {
-//                        messages.append(reply)
-//                        isLoading = false
-//                    }
-//                }
-//            } catch {
-//                print("Error: \(error)")
-//                await MainActor.run {
-//                    isLoading = false
-//                }
-//            }
-//        }
+        Task {
+            do {
+                let response = try await openAI.chat.sendMessage(messages, model: .gpt4)
+                await MainActor.run {
+                    messages.append(response)
+                    isLoading = false
+                }
+            } catch {
+                print("Error: \(error)")
+                await MainActor.run {
+                    isLoading = false
+                }
+            }
+        }
     }
 }
 

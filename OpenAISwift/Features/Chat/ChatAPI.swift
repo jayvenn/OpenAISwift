@@ -7,15 +7,15 @@ public protocol ChatAPI {
     /// - Returns: The chat completion response
     func createChatCompletion(_ request: ChatCompletionRequest) async throws -> ChatCompletionResponse
     
-    /// Convenience method to send a simple chat message
+    /// Convenience method to send chat messages
     /// - Parameters:
-    ///   - message: The message content
+    ///   - messages: Array of chat messages
     ///   - model: The model to use
     /// - Returns: The assistant's response message
     func sendMessage(
-        _ message: String,
+        _ messages: [ChatMessage],
         model: OpenAIModel
-    ) async throws -> String
+    ) async throws -> ChatMessage
 }
 
 /// Implementation of the Chat API
@@ -34,17 +34,35 @@ public struct ChatEndpoint: OpenAIFeature, ChatAPI {
     }
     
     public func sendMessage(
-        _ message: String,
+        _ messages: [ChatMessage],
         model: OpenAIModel = .defaultModel(for: .chatCompletion)
-    ) async throws -> String {
-        let messages = [ChatMessage(role: .user, content: message)]
+    ) async throws -> ChatMessage {
         let request = ChatCompletionRequest(model: model, messages: messages)
         
-        let response = try await createChatCompletion(request)
-        guard let choice = response.choices.first else {
-            throw OpenAIError.invalidResponse
+        do {
+            let response = try await createChatCompletion(request)
+            guard let choice = response.choices.first else {
+                let error = OpenAIError.invalidResponse
+                print("Error in sendMessage: \(error.localizedDescription)")
+                throw error
+            }
+            return choice.message
+        } catch let error as OpenAIError {
+            switch error {
+            case .httpError(let statusCode, let data):
+                if let data = data,
+                   let errorResponse = try? JSONDecoder().decode(OpenAIErrorResponse.self, from: data) {
+                    print("OpenAI API Error (\(statusCode)): \(errorResponse.error.message)")
+                } else {
+                    print("HTTP Error \(statusCode): \(error.localizedDescription)")
+                }
+            default:
+                print("Error in sendMessage: \(error.localizedDescription)")
+            }
+            throw error
+        } catch {
+            print("Unexpected error in sendMessage: \(error.localizedDescription)")
+            throw error
         }
-        
-        return choice.message.content
     }
 }
