@@ -16,23 +16,89 @@ public struct FunctionConfiguration: Codable {
     public let description: String?
     
     /// The parameters the function accepts, described as a JSON Schema object
-    public let parameters: [String: Any]
+    public let parameters: JSONSchema
+    
+    public init(
+        name: String,
+        description: String? = nil,
+        parameters: JSONSchema
+    ) {
+        self.name = name
+        self.description = description
+        self.parameters = parameters
+    }
+}
+
+/// Represents a JSON Schema structure
+public struct JSONSchema: Codable {
+    /// The underlying storage for schema properties
+    private var storage: [String: Any]
+    
+    public init(_ dictionary: [String: Any]) {
+        self.storage = dictionary
+    }
     
     public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        name = try container.decode(String.self, forKey: .name)
-        description = try container.decodeIfPresent(String.self, forKey: .description)
-        parameters = try container.decode([String: Any].self, forKey: .parameters)
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        var dictionary: [String: Any] = [:]
+        
+        for key in container.allKeys {
+            if let value = try? container.decode(String.self, forKey: key) {
+                dictionary[key.stringValue] = value
+            } else if let value = try? container.decode(Int.self, forKey: key) {
+                dictionary[key.stringValue] = value
+            } else if let value = try? container.decode(Double.self, forKey: key) {
+                dictionary[key.stringValue] = value
+            } else if let value = try? container.decode(Bool.self, forKey: key) {
+                dictionary[key.stringValue] = value
+            } else if let value = try? container.decode([String].self, forKey: key) {
+                dictionary[key.stringValue] = value
+            } else if let value = try? container.decode([String: JSONSchema].self, forKey: key) {
+                dictionary[key.stringValue] = value
+            } else if let value = try? container.decode(JSONSchema.self, forKey: key) {
+                dictionary[key.stringValue] = value
+            }
+        }
+        
+        self.storage = dictionary
     }
     
     public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(name, forKey: .name)
-        try container.encodeIfPresent(description, forKey: .description)
-        try container.encode(parameters, forKey: .parameters)
+        var container = encoder.container(keyedBy: StringCodingKey.self)
+        
+        for (key, value) in storage {
+            let codingKey = StringCodingKey(stringValue: key)
+            switch value {
+            case let value as String:
+                try container.encode(value, forKey: codingKey)
+            case let value as Int:
+                try container.encode(value, forKey: codingKey)
+            case let value as Double:
+                try container.encode(value, forKey: codingKey)
+            case let value as Bool:
+                try container.encode(value, forKey: codingKey)
+            case let value as [String]:
+                try container.encode(value, forKey: codingKey)
+            case let value as [String: JSONSchema]:
+                try container.encode(value, forKey: codingKey)
+            case let value as JSONSchema:
+                try container.encode(value, forKey: codingKey)
+            default:
+                break
+            }
+        }
+    }
+}
+
+private struct StringCodingKey: CodingKey {
+    var stringValue: String
+    var intValue: Int?
+    
+    init(stringValue: String) {
+        self.stringValue = stringValue
     }
     
-    private enum CodingKeys: String, CodingKey {
-        case name, description, parameters
+    init?(intValue: Int) {
+        return nil
     }
 }
