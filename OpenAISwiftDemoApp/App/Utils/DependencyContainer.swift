@@ -14,7 +14,7 @@ final class DependencyContainer {
     static let shared = DependencyContainer()
     
     /// The OpenAI client instance
-    let openAIClient: OpenAIClient = OpenAIClient(apiKey: "")
+    let openAIClient: OpenAIClient = OpenAIClient(apiKey: "YOUR_API_KEY")
     
     private init() {}
 }
