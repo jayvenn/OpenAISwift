@@ -9,27 +9,40 @@ final class AssistantsEndpoint: AssistantsAPI {
     }
     
     func create(_ request: CreateAssistantRequest) async throws -> Assistant {
-        let endpoint = OpenAIEndpoint.assistants
-        return try await client.post(to: endpoint, body: request)
+        try await client.performRequest(
+            endpoint: .assistants,
+            body: request
+        )
     }
     
     func retrieve(id: String) async throws -> Assistant {
-        let endpoint = OpenAIEndpoint.assistant(id: id)
-        return try await client.get(from: endpoint)
+        try await client.performRequest(
+            endpoint: .assistant(id: id),
+            body: EmptyBody()
+        )
     }
     
     func modify(id: String, _ request: ModifyAssistantRequest) async throws -> Assistant {
-        let endpoint = OpenAIEndpoint.assistant(id: id)
-        return try await client.post(to: endpoint, body: request)
+        try await client.performRequest(
+            endpoint: .assistant(id: id),
+            body: request
+        )
     }
     
     func delete(id: String) async throws -> DeletionStatus {
-        let endpoint = OpenAIEndpoint.assistant(id: id)
-        return try await client.delete(at: endpoint)
+        try await client.performRequest(
+            endpoint: .assistant(id: id),
+            body: EmptyBody()
+        )
     }
     
     func list(query: ListQuery?) async throws -> PaginatedResponse<Assistant> {
-        let endpoint = OpenAIEndpoint.assistants
-        return try await client.get(from: endpoint, query: query)
+        try await client.performRequest(
+            endpoint: .assistants,
+            body: query
+        )
     }
 }
+
+/// Empty body for requests that don't need a body
+private struct EmptyBody: Codable {}
