@@ -50,8 +50,7 @@ public struct ChatEndpoint: OpenAIFeature, ChatAPI {
         } catch let error as OpenAIError {
             switch error {
             case .httpError(let statusCode, let data):
-                if let data = data,
-                   let errorResponse = try? JSONDecoder().decode(OpenAIErrorResponse.self, from: data) {
+                if let errorResponse = try? JSONDecoder().decode(OpenAIErrorResponse.self, from: data) {
                     print("OpenAI API Error (\(statusCode)): \(errorResponse.error.message)")
                 } else {
                     print("HTTP Error \(statusCode): \(error.localizedDescription)")

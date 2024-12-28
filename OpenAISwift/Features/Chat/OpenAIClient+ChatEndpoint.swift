@@ -6,7 +6,7 @@ extension OpenAIClient {
     /// - Returns: The chat completion response
     public func createChatCompletion(_ request: ChatCompletionRequest) async throws -> ChatCompletionResponse {
         return try await performRequest(
-            endpoint: ChatEndpoint.chatCompletions,
+            endpoint: .chatCompletions,
             body: request
         )
     }
@@ -23,7 +23,7 @@ extension OpenAIClient {
         streamingRequest.stream = true
         
         try await performStreamingRequest(
-            endpoint: ChatEndpoint.chatCompletions,
+            endpoint: .chatCompletions,
             body: streamingRequest,
             delegate: delegate
         )

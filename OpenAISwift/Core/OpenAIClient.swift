@@ -5,7 +5,7 @@ public final class OpenAIClient {
     private let configuration: OpenAIConfiguration
     
     /// Networking layer for API requests
-    private let network: OpenAINetworking
+    private let network: OpenAINetworking & OpenAIStreamingNetworking
     
     /// The API key used for authentication
     public var apiKey: String { configuration.apiKey }
@@ -27,7 +27,7 @@ public final class OpenAIClient {
     ///   - network: Custom networking implementation
     public init(
         configuration: OpenAIConfiguration,
-        network: OpenAINetworking
+        network: OpenAINetworking & OpenAIStreamingNetworking
     ) {
         self.configuration = configuration
         self.network = network
@@ -98,5 +98,22 @@ public final class OpenAIClient {
         body: B? = nil
     ) async throws -> T {
         try await network.performRequest(endpoint: endpoint, body: body)
+    }
+    
+    /// Performs a streaming API request
+    /// - Parameters:
+    ///   - endpoint: The API endpoint
+    ///   - body: The request body to encode
+    ///   - delegate: The delegate to receive streaming updates
+    internal func performStreamingRequest<B: Encodable>(
+        endpoint: OpenAIEndpoint,
+        body: B,
+        delegate: ChatStreamingDelegate
+    ) async throws {
+        try await network.performStreamingRequest(
+            endpoint: endpoint,
+            body: body,
+            delegate: delegate
+        )
     }
 }
