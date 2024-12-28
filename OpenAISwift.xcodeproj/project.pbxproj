@@ -113,7 +113,6 @@
 				B94EEB442D1DF63D001F53FD /* OpenAISwift */,
 				B94EEC092D1E5311001F53FD /* OpenAISwiftTests */,
 				B94EECB72D1E5AAD001F53FD /* OpenAISwiftDemoApp */,
-				B94EED0D2D203EB9001F53FD /* Frameworks */,
 				B94EEB432D1DF63D001F53FD /* Products */,
 			);
 			sourceTree = "<group>";
@@ -126,13 +125,6 @@
 				B94EECB62D1E5AAD001F53FD /* OpenAISwiftDemoApp.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		B94EED0D2D203EB9001F53FD /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
