@@ -1,4 +1,5 @@
 import Foundation
+
 /// Main client for interacting with OpenAI's API
 public final class OpenAIClient {
     /// The client configuration
@@ -20,6 +21,12 @@ public final class OpenAIClient {
     
     /// Embeddings API
     public lazy var embeddings: EmbeddingsAPI = EmbeddingsEndpoint(client: self)
+    
+    /// Assistants API
+    public lazy var assistants: AssistantsAPI = AssistantsEndpoint(client: self)
+    
+    /// Real-Time API
+    public lazy var realTime: RealTimeAPI = RealTimeEndpoint(client: self)
     
     /// Creates a new OpenAI client with custom networking
     /// - Parameters:
