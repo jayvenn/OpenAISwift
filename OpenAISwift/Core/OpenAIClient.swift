@@ -48,6 +48,13 @@ public final class OpenAIClient {
         self.init(configuration: configuration, network: network)
     }
     
+    /// Creates a new OpenAI client with just an API key
+    /// - Parameter apiKey: The OpenAI API key for authentication
+    public convenience init(apiKey: String) {
+        let configuration = OpenAIConfiguration(apiKey: apiKey)
+        self.init(configuration: configuration)
+    }
+    
     /// Creates default headers for API requests
     internal var defaultHeaders: [String: String] {
         var headers = [

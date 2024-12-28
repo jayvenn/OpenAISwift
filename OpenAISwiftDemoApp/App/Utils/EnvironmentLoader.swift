@@ -14,15 +14,7 @@ final class DependencyContainer {
     static let shared = DependencyContainer()
     
     /// The OpenAI client instance
-    lazy var openAIClient: OpenAIClient = {
-        do {
-            let apiKey = try EnvironmentLoader.loadAPIKey()
-            let configuration = OpenAIConfiguration(apiKey: apiKey)
-            return OpenAIClient(configuration: configuration)
-        } catch {
-            fatalError("OpenAI API key not found. Please add OPENAI_API_KEY to your environment or .env file")
-        }
-    }()
+    let openAIClient: OpenAIClient = OpenAIClient(apiKey: "")
     
     private init() {}
 }
