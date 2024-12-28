@@ -11,6 +11,24 @@ extension OpenAIClient {
         )
     }
     
+    /// Send a streaming chat completion request
+    /// - Parameters:
+    ///   - request: The chat completion request parameters
+    ///   - delegate: The delegate to receive streaming updates
+    public func createStreamingChatCompletion(
+        _ request: ChatCompletionRequest,
+        delegate: ChatStreamingDelegate
+    ) async throws {
+        var streamingRequest = request
+        streamingRequest.stream = true
+        
+        try await performStreamingRequest(
+            endpoint: .chatCompletions,
+            body: streamingRequest,
+            delegate: delegate
+        )
+    }
+    
     /// Convenience method to send a simple chat message
     /// - Parameters:
     ///   - message: The message content
@@ -29,5 +47,20 @@ extension OpenAIClient {
         }
         
         return choice.message.content
+    }
+    
+    /// Convenience method to send a simple streaming chat message
+    /// - Parameters:
+    ///   - message: The message content
+    ///   - model: The model to use (defaults to gpt-3.5-turbo)
+    ///   - delegate: The delegate to receive streaming updates
+    public func sendStreamingMessage(
+        _ message: String,
+        model: OpenAIModel = .defaultModel(for: .chatCompletion),
+        delegate: ChatStreamingDelegate
+    ) async throws {
+        let messages = [ChatMessage(role: .user, content: message)]
+        let request = ChatCompletionRequest(model: model, messages: messages)
+        try await createStreamingChatCompletion(request, delegate: delegate)
     }
 }
