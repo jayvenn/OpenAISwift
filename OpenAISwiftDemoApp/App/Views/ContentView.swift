@@ -22,12 +22,6 @@ struct ContentView: View {
                 icon: "photo.artframe",
                 destination: AnyView(ImageGenerationView()),
                 description: "Generate images from text descriptions using DALL-E"
-            ),
-            Feature(
-                name: "Text Completion",
-                icon: "text.bubble.fill",
-                destination: AnyView(TextCompletionView()),
-                description: "Generate and complete text using GPT models"
             )
         ]
     }
