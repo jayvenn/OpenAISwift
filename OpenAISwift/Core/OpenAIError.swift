@@ -7,16 +7,22 @@
 
 import Foundation
 
-/// Represents errors that can occur when interacting with the OpenAI API
+/// Errors that can occur when using the OpenAI API
 public enum OpenAIError: LocalizedError, Equatable {
-    /// The API request failed with an HTTP error
+    /// The URL was invalid
+    case invalidURL
+    
+    /// The response was invalid
+    case invalidResponse
+    
+    /// An HTTP error occurred
     case httpError(statusCode: Int, data: Data)
     
-    /// The response could not be decoded
-    case decodingError(Error)
+    /// A server error occurred
+    case serverError(String)
     
-    /// The response was invalid or malformed
-    case invalidResponse
+    /// No active session
+    case noActiveSession
     
     /// The API key is missing or invalid
     case invalidAPIKey
@@ -36,14 +42,21 @@ public enum OpenAIError: LocalizedError, Equatable {
     /// Unknown error occurred
     case unknownError
     
+    /// The response could not be decoded
+    case decodingError(Error)
+    
     public var errorDescription: String? {
         switch self {
-        case .httpError(let statusCode, _):
-            return "Request failed with status code: \(statusCode)"
-        case .decodingError(let error):
-            return "Failed to decode response: \(error.localizedDescription)"
+        case .invalidURL:
+            return "The URL was invalid"
         case .invalidResponse:
-            return "The server returned an invalid response"
+            return "The response was invalid"
+        case .httpError(let statusCode, _):
+            return "HTTP error \(statusCode)"
+        case .serverError(let message):
+            return message
+        case .noActiveSession:
+            return "No active session"
         case .invalidAPIKey:
             return "The API key is missing or invalid"
         case .rateLimitExceeded(let resetTime):
@@ -59,17 +72,23 @@ public enum OpenAIError: LocalizedError, Equatable {
             return "The request timed out"
         case .unknownError:
             return "An unknown error occurred"
+        case .decodingError(let error):
+            return "Failed to decode response: \(error.localizedDescription)"
         }
     }
     
     public var recoverySuggestion: String? {
         switch self {
-        case .httpError:
-            return "Please check your request parameters and try again"
-        case .decodingError:
-            return "Please ensure your request format is correct"
+        case .invalidURL:
+            return "Please check your request URL"
         case .invalidResponse:
             return "Please try again later"
+        case .httpError:
+            return "Please check your request parameters and try again"
+        case .serverError:
+            return "Please try again later"
+        case .noActiveSession:
+            return "Please establish a session before making a request"
         case .invalidAPIKey:
             return "Please check your API key configuration"
         case .rateLimitExceeded:
@@ -82,6 +101,8 @@ public enum OpenAIError: LocalizedError, Equatable {
             return "Please try again or increase the timeout interval"
         case .unknownError:
             return "Please try again or contact support if the issue persists"
+        case .decodingError:
+            return "Please ensure your request format is correct"
         }
     }
     
@@ -90,7 +111,8 @@ public enum OpenAIError: LocalizedError, Equatable {
         case (.invalidResponse, .invalidResponse),
              (.invalidAPIKey, .invalidAPIKey),
              (.timeout, .timeout),
-             (.unknownError, .unknownError):
+             (.unknownError, .unknownError),
+             (.noActiveSession, .noActiveSession):
             return true
         case let (.httpError(lhsCode, lhsData), .httpError(rhsCode, rhsData)):
             return lhsCode == rhsCode && lhsData == rhsData
@@ -102,6 +124,8 @@ public enum OpenAIError: LocalizedError, Equatable {
             return lhsModel == rhsModel
         case let (.networkError(lhsError), .networkError(rhsError)):
             return lhsError.localizedDescription == rhsError.localizedDescription
+        case let (.serverError(lhsMessage), .serverError(rhsMessage)):
+            return lhsMessage == rhsMessage
         default:
             return false
         }
