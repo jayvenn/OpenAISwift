@@ -46,7 +46,7 @@ extension OpenAIClient {
             throw OpenAIError.invalidResponse
         }
         
-        return choice.message.content
+        return choice.message.content ?? ""
     }
     
     /// Convenience method to send a simple streaming chat message

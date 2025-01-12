@@ -108,7 +108,7 @@ private struct MessageBubble: View {
         HStack {
             if isUser { Spacer() }
             
-            Text(message.content)
+            Text(message.content ?? "")
                 .padding()
                 .foregroundStyle(isUser ? .white : .primary)
                 .background(isUser ? .blue : .gray.opacity(0.2))

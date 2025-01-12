@@ -1,48 +1,78 @@
 import Foundation
 
-/// Represents a streaming chat completion response chunk
-public struct ChatStreamingResponse: Codable {
-    /// The ID of the chat completion
+/// Response structure for streaming chat completions
+public struct ChatStreamingResponse: Codable, Sendable {
+    /// The unique identifier for this completion
     public let id: String
     
     /// The object type (always "chat.completion.chunk")
     public let object: String
     
-    /// The timestamp of when the completion was created
+    /// The timestamp of when the chunk was created
     public let created: Int
     
     /// The model used for completion
     public let model: String
     
-    /// The streaming choices containing delta messages
-    public let choices: [ChatStreamingChoice]
+    /// The list of completion choices
+    public let choices: [Choice]
 }
 
-/// Represents a streaming choice in the chat completion response
-public struct ChatStreamingChoice: Codable {
-    /// The index of this choice
-    public let index: Int
-    
-    /// The delta containing the message content
-    public let delta: ChatStreamingDelta
-    
-    /// The reason why the streaming stopped, if applicable
-    public let finishReason: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case index
-        case delta
-        case finishReason = "finish_reason"
+// MARK: - Nested Types
+public extension ChatStreamingResponse {
+    /// A single completion choice in a streaming response
+    struct Choice: Codable, Sendable {
+        /// The index of this choice in the list
+        public let index: Int
+        
+        /// The delta of content to append
+        public let delta: Delta
+        
+        /// Why the completion stopped (if applicable)
+        public let finishReason: FinishReason?
+        
+        enum CodingKeys: String, CodingKey {
+            case index
+            case delta
+            case finishReason = "finish_reason"
+        }
     }
-}
-
-/// Represents the delta content in a streaming response
-public struct ChatStreamingDelta: Codable {
-    /// The role of the message, if present in the delta
-    public let role: ChatRole?
     
-    /// The content of the message, if present in the delta
-    public let content: String?
+    /// The delta content to append
+    struct Delta: Codable, Sendable {
+        /// The role of the message author (only in first chunk)
+        public let role: ChatRole?
+        
+        /// The content to append
+        public let content: String?
+        
+        /// The function call to append
+        public let functionCall: ChatFunctionCall?
+        
+        enum CodingKeys: String, CodingKey {
+            case role
+            case content
+            case functionCall = "function_call"
+        }
+    }
+    
+    /// Reasons why a streaming completion finished
+    enum FinishReason: String, Codable, Sendable {
+        /// API returned complete message
+        case stop
+        
+        /// Incomplete model output due to max_tokens parameter or token limit
+        case length
+        
+        /// Omitted content due to content filter
+        case contentFilter = "content_filter"
+        
+        /// The model called a function
+        case functionCall = "function_call"
+        
+        /// The model decided to call a function
+        case tool = "tool_calls"
+    }
 }
 
 /// Protocol for handling streaming chat completions

@@ -31,7 +31,7 @@ final class ChatViewModel: ObservableObject {
             if isStreaming {
                 try await sendStreamingMessage(userMessage)
             } else {
-                let responseContent = try await openAI.sendMessage(userMessage.content, model: .gpt4)
+                let responseContent = try await openAI.sendMessage(userMessage.content ?? "", model: .gpt4)
                 await MainActor.run {
                     messages.append(.init(role: .assistant, content: responseContent))
                 }

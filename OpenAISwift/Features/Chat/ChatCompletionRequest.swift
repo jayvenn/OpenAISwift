@@ -32,6 +32,12 @@ public struct ChatCompletionRequest: Codable, Sendable {
     /// Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far
     public let frequencyPenalty: Double?
     
+    /// The functions that can be called by the model
+    public let functions: [FunctionConfiguration]?
+    
+    /// Controls how the model uses the available functions
+    public let functionCall: ChatFunctionConfiguration.FunctionCallOption?
+    
     enum CodingKeys: String, CodingKey {
         case model, messages, temperature
         case topP = "top_p"
@@ -39,6 +45,8 @@ public struct ChatCompletionRequest: Codable, Sendable {
         case maxTokens = "max_tokens"
         case presencePenalty = "presence_penalty"
         case frequencyPenalty = "frequency_penalty"
+        case functions
+        case functionCall = "function_call"
     }
     
     public init(
@@ -51,7 +59,9 @@ public struct ChatCompletionRequest: Codable, Sendable {
         stop: [String]? = nil,
         maxTokens: Int? = nil,
         presencePenalty: Double? = nil,
-        frequencyPenalty: Double? = nil
+        frequencyPenalty: Double? = nil,
+        functions: [FunctionConfiguration]? = nil,
+        functionCall: ChatFunctionConfiguration.FunctionCallOption? = nil
     ) {
         self.model = model
         self.messages = messages
@@ -63,5 +73,7 @@ public struct ChatCompletionRequest: Codable, Sendable {
         self.maxTokens = maxTokens
         self.presencePenalty = presencePenalty
         self.frequencyPenalty = frequencyPenalty
+        self.functions = functions
+        self.functionCall = functionCall
     }
 }
