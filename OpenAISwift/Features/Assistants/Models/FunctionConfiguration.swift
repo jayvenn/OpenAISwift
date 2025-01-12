@@ -8,7 +8,7 @@
 import Foundation
 
 /// Configuration for a function tool
-public struct FunctionConfiguration: Codable {
+public struct FunctionConfiguration: Codable, Sendable {
     /// The name of the function
     public let name: String
     
@@ -30,75 +30,191 @@ public struct FunctionConfiguration: Codable {
 }
 
 /// Represents a JSON Schema structure
-public struct JSONSchema: Codable {
-    /// The underlying storage for schema properties
-    private var storage: [String: Any]
+@dynamicMemberLookup
+public final class JSONSchema: Codable, @unchecked Sendable {
+    /// The type of the schema value
+    public let type: SchemaType
     
-    public init(_ dictionary: [String: Any]) {
-        self.storage = dictionary
+    /// Description of the schema
+    public let description: String?
+    
+    /// Whether the property is required
+    public let required: [String]?
+    
+    /// Properties for object types
+    public let properties: [String: JSONSchema]?
+    
+    /// Items schema for array types
+    public let items: JSONSchema?
+    
+    /// Whether additional properties are allowed for object types
+    public let additionalProperties: Bool?
+    
+    /// Whether the schema is strict
+    public let strict: Bool?
+    
+    public init(
+        type: SchemaType,
+        description: String? = nil,
+        required: [String]? = nil,
+        properties: [String: JSONSchema]? = nil,
+        items: JSONSchema? = nil,
+        additionalProperties: Bool? = nil,
+        strict: Bool? = nil
+    ) {
+        self.type = type
+        self.description = description
+        self.required = required
+        self.properties = properties
+        self.items = items
+        self.additionalProperties = additionalProperties
+        self.strict = strict
     }
     
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
-        var dictionary: [String: Any] = [:]
-        
-        for key in container.allKeys {
-            if let value = try? container.decode(String.self, forKey: key) {
-                dictionary[key.stringValue] = value
-            } else if let value = try? container.decode(Int.self, forKey: key) {
-                dictionary[key.stringValue] = value
-            } else if let value = try? container.decode(Double.self, forKey: key) {
-                dictionary[key.stringValue] = value
-            } else if let value = try? container.decode(Bool.self, forKey: key) {
-                dictionary[key.stringValue] = value
-            } else if let value = try? container.decode([String].self, forKey: key) {
-                dictionary[key.stringValue] = value
-            } else if let value = try? container.decode([String: JSONSchema].self, forKey: key) {
-                dictionary[key.stringValue] = value
-            } else if let value = try? container.decode(JSONSchema.self, forKey: key) {
-                dictionary[key.stringValue] = value
-            }
-        }
-        
-        self.storage = dictionary
+    public enum SchemaType: String, Codable, Sendable {
+        case object
+        case array
+        case string
+        case number
+        case integer
+        case boolean
+        case null
     }
     
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: StringCodingKey.self)
-        
-        for (key, value) in storage {
-            let codingKey = StringCodingKey(stringValue: key)
-            switch value {
-            case let value as String:
-                try container.encode(value, forKey: codingKey)
-            case let value as Int:
-                try container.encode(value, forKey: codingKey)
-            case let value as Double:
-                try container.encode(value, forKey: codingKey)
-            case let value as Bool:
-                try container.encode(value, forKey: codingKey)
-            case let value as [String]:
-                try container.encode(value, forKey: codingKey)
-            case let value as [String: JSONSchema]:
-                try container.encode(value, forKey: codingKey)
-            case let value as JSONSchema:
-                try container.encode(value, forKey: codingKey)
-            default:
-                break
-            }
-        }
+    enum CodingKeys: String, CodingKey {
+        case type
+        case description
+        case required
+        case properties
+        case items
+        case additionalProperties
+        case strict
+    }
+    
+    public subscript<T>(dynamicMember keyPath: KeyPath<JSONSchema, T>) -> T {
+        self[keyPath: keyPath]
     }
 }
 
-private struct StringCodingKey: CodingKey {
-    var stringValue: String
-    var intValue: Int?
-    
-    init(stringValue: String) {
-        self.stringValue = stringValue
-    }
-    
-    init?(intValue: Int) {
-        return nil
+// Helper function to create a schema for your example
+public extension JSONSchema {
+    static func generateBabyPredictionsSchema() -> JSONSchema {
+        return JSONSchema(
+            type: .object,
+            required: [
+                "parent_photos",
+                "sweet_details",
+                "delightful_surprises",
+                "viral_moments",
+                "day_in_life"
+            ],
+            properties: [
+                "day_in_life": JSONSchema(
+                    type: .string,
+                    description: "A touching 'Day in the Life' story of the child at age 3."
+                ),
+                "parent_photos": JSONSchema(
+                    type: .array,
+                    description: "Array of two parent photos to generate predictions from.",
+                    items: JSONSchema(
+                        type: .string,
+                        description: "Base64 encoded string of the parent photo."
+                    )
+                ),
+                "sweet_details": JSONSchema(
+                    type: .object,
+                    required: [
+                        "first_smile",
+                        "comfort_food",
+                        "special_talent",
+                        "inherited_habits",
+                        "expressions"
+                    ],
+                    properties: [
+                        "expressions": JSONSchema(
+                            type: .string,
+                            description: "Which parent's expressions the baby will mirror most."
+                        ),
+                        "first_smile": JSONSchema(
+                            type: .string,
+                            description: "Prediction of who will make the baby smile first."
+                        ),
+                        "comfort_food": JSONSchema(
+                            type: .string,
+                            description: "Future comfort food cravings based on parents' favorites."
+                        ),
+                        "special_talent": JSONSchema(
+                            type: .string,
+                            description: "Special talent or passion that the baby might inherit."
+                        ),
+                        "inherited_habits": JSONSchema(
+                            type: .string,
+                            description: "Heartwarming habits the baby will learn from each parent."
+                        )
+                    ],
+                    additionalProperties: false
+                ),
+                "viral_moments": JSONSchema(
+                    type: .object,
+                    required: [
+                        "celebrity_twin",
+                        "future_career",
+                        "signature_move"
+                    ],
+                    properties: [
+                        "future_career": JSONSchema(
+                            type: .string,
+                            description: "Unexpected career aspiration based on combined parent traits."
+                        ),
+                        "celebrity_twin": JSONSchema(
+                            type: .string,
+                            description: "Which famous person's baby photos the child will resemble."
+                        ),
+                        "signature_move": JSONSchema(
+                            type: .string,
+                            description: "Unique, cute habit or gesture known for combining both parents."
+                        )
+                    ],
+                    additionalProperties: false
+                ),
+                "delightful_surprises": JSONSchema(
+                    type: .object,
+                    required: [
+                        "early_years",
+                        "childhood",
+                        "teen_years"
+                    ],
+                    properties: [
+                        "childhood": JSONSchema(
+                            type: .array,
+                            description: "Predictions for early childhood stage (6-10 years).",
+                            items: JSONSchema(
+                                type: .string,
+                                description: "Creative tendencies, special interests, friend dynamics."
+                            )
+                        ),
+                        "teen_years": JSONSchema(
+                            type: .array,
+                            description: "Predictions for the teen years (11-18 years).",
+                            items: JSONSchema(
+                                type: .string,
+                                description: "Future dreams, unique talents, family bonds."
+                            )
+                        ),
+                        "early_years": JSONSchema(
+                            type: .array,
+                            description: "Predictions for the baby and toddler stage (1-5 years).",
+                            items: JSONSchema(
+                                type: .string,
+                                description: "Personality quirks, first words, unique preferences."
+                            )
+                        )
+                    ],
+                    additionalProperties: false
+                )
+            ],
+            additionalProperties: false,
+            strict: true
+        )
     }
 }
